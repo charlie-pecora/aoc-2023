@@ -26,8 +26,6 @@ fn main() {
             }
             None => {}
         };
-        println!("{}", line);
-        println!("{:?}", digit);
     }
     println!("{:?}", calibration_codes);
     println!("{:?}", calibration_codes_sum);
