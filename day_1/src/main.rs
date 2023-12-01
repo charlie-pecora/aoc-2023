@@ -23,7 +23,7 @@ fn main() {
             Some(v) => {
                 calibration_codes.push(v);
                 calibration_codes_sum += v;
-            },
+            }
             None => {}
         };
         println!("{}", line);
@@ -33,15 +33,14 @@ fn main() {
     println!("{:?}", calibration_codes_sum);
 }
 
-
 fn parse_digits(line: &str) -> Option<u32> {
     let digits: Vec<char> = line.chars().filter(|c| c.is_numeric()).collect();
     if digits.len() != 0 {
-        let digit = digits[0].to_digit(10).unwrap() * 10 
-            + digits[digits.len() - 1].to_digit(10).unwrap();
+        let digit =
+            digits[0].to_digit(10).unwrap() * 10 + digits[digits.len() - 1].to_digit(10).unwrap();
         return Some(digit);
     } else {
-    return None;
+        return None;
     }
 }
 
@@ -61,14 +60,12 @@ fn parse_digits_2(line: &str) -> Option<u32> {
                     break;
                 }
             }
-
         }
     }
     if digits.len() != 0 {
-        let digit = digits[0] * 10 
-            + digits[digits.len() - 1];
+        let digit = digits[0] * 10 + digits[digits.len() - 1];
         return Some(digit);
     } else {
-    return None;
+        return None;
     }
 }
