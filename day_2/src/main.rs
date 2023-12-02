@@ -70,32 +70,60 @@ impl Game {
             cube_selections: cube_selections,
         })
     }
+
+    fn is_possible(&self, given: &CubeSelection) -> bool {
+        for selection in &self.cube_selections {
+            if !selection.is_possible(given) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    fn calculate_power(&self) -> u32 {
+        let mut blue: u32 = 0;
+        let mut green: u32 = 0;
+        let mut red: u32 = 0;
+        for cube_selection in &self.cube_selections {
+            if cube_selection.blue > blue {
+                blue = cube_selection.blue;
+            }
+            if cube_selection.green > green {
+                green = cube_selection.green;
+            }
+            if cube_selection.red > red {
+                red = cube_selection.red;
+            }
+        }
+        return blue * green * red;
+    }
 }
 
 fn main() -> Result<()> {
     let filename = "input.txt";
     let mut game_id_sum: u32 = 0;
+    let mut power_sum: u32 = 0;
     for line in fs::read_to_string(filename)
         .expect("Could not open input file")
         .lines()
     {
         match Game::parse_from_str(line) {
             Ok(g) => {
-                let mut is_possible = true;
-                for selection in &g.cube_selections {
-                    if !selection.is_possible(&GIVEN_CUBES) {
-                        is_possible = false;
-                        break;
-                    }
-                }
-                println!("is possible: {:?}, {:?}", is_possible, g);
+                let is_possible = g.is_possible(&GIVEN_CUBES);
+                let power = g.calculate_power();
+                println!(
+                    "power: {:?}, is possible: {:?}, {:?}",
+                    power, is_possible, g
+                );
                 if is_possible {
                     game_id_sum += g.id;
                 }
+                power_sum += power;
             }
-            Err(g) => println!("Couldn't parse line"),
+            Err(e) => println!("Couldn't parse line {:?}", e),
         }
     }
-    println!("game id sum: {:?}", game_id_sum);
+    println!("possible game id sum: {:?}", game_id_sum);
+    println!("sum of game powers: {:?}", power_sum);
     Ok(())
 }
