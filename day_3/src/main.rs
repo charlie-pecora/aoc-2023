@@ -5,6 +5,7 @@ fn main() -> Result<()> {
     let filename = "input.txt";
     // let filename = "test.txt";
     let mut part_number_sum: u32 = 0;
+    let mut total_gear_ratio: u32 = 0;
     let mut last_line_chars: Vec<SpecialChar> = vec![];
     let mut last_line_numbers: Vec<Number> = vec![];
     for line in fs::read_to_string(filename)
@@ -17,7 +18,7 @@ fn main() -> Result<()> {
         let mut current_num_str: Vec<char> = vec![];
         for (i, c) in line.chars().enumerate() {
             if (!c.is_numeric()) && (c != '.') {
-                line_chars.push(SpecialChar { i, v: c });
+                line_chars.push(SpecialChar { i, v: c , gears: vec![]});
             }
             if c.is_numeric() {
                 current_num_str.push(c)
@@ -41,34 +42,53 @@ fn main() -> Result<()> {
             });
         }
         for number in &mut last_line_numbers.iter_mut() {
-            for c in &line_chars {
+            for c in &mut line_chars.iter_mut() {
                 if (c.i + 1 >= number.start_index)
                     && (c.i <= number.end_index + 1)
-                    && (!number.used)
                 {
-                    part_number_line_sum += number.v;
-                    number.used = true;
+                    if c.v == '*' {
+                        c.gears.push(number.v);
+                    }
+                    if !number.used {
+                        part_number_line_sum += number.v;
+                        number.used = true;
+                    }
                 }
             }
         }
         for number in &mut line_numbers.iter_mut() {
-            for c in &line_chars {
+            for c in &mut line_chars.iter_mut() {
                 if (c.i + 1 >= number.start_index)
                     && (c.i <= number.end_index + 1)
                     && (!number.used)
                 {
-                    part_number_line_sum += number.v;
-                    number.used = true;
+                    if c.v == '*' {
+                        c.gears.push(number.v);
+                    }
+                    if !number.used {
+                        part_number_line_sum += number.v;
+                        number.used = true;
+                    }
                 }
             }
-            for c in &last_line_chars {
+            for c in &mut last_line_chars.iter_mut() {
                 if (c.i + 1 >= number.start_index)
                     && (c.i <= number.end_index + 1)
                     && (!number.used)
                 {
-                    part_number_line_sum += number.v;
-                    number.used = true;
+                    if c.v == '*' {
+                        c.gears.push(number.v);
+                    }
+                    if !number.used {
+                        part_number_line_sum += number.v;
+                        number.used = true;
+                    }
                 }
+            }
+        }
+        for c in &last_line_chars {
+            if c.gears.len() == 2 {
+                total_gear_ratio += c.gears[0] * c.gears[1];
             }
         }
         part_number_sum += part_number_line_sum;
@@ -81,6 +101,7 @@ fn main() -> Result<()> {
     }
     println!("{:?}, {:?}", last_line_chars, last_line_numbers);
     println!("part # sum: {}", part_number_sum);
+    println!("Total Gear Ratio: {}", total_gear_ratio);
     Ok(())
 }
 
@@ -88,6 +109,7 @@ fn main() -> Result<()> {
 struct SpecialChar {
     i: usize,
     v: char,
+    gears: Vec<u32>,
 }
 
 #[derive(Debug)]
