@@ -19,13 +19,12 @@ fn main() -> Result<()> {
                 };
                 total_cards += 1 + card_copies;
                 card_score_sum += card.score();
-                for _ in 0..(card_copies + 1) {
-                    for i in 0..card.matches() {
-                        match card_copies_queue.get_mut(i) {
-                            Some(v) => *v += 1,
-                            None => card_copies_queue.push_back(1),
-                        };
-                    }
+                let matches = card.matches();
+                for i in 0..matches {
+                    match card_copies_queue.get_mut(i) {
+                        Some(v) => *v += 1 + card_copies,
+                        None => card_copies_queue.push_back(1 + card_copies),
+                    };
                 }
             }
             Err(e) => println!("Couldn't parse line {:?} {}", e, line),
