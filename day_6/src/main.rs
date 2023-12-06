@@ -1,7 +1,9 @@
 use anyhow::Result;
 use std::fs;
+use std::time::Instant;
 
 fn main() -> Result<()> {
+    let mut now = Instant::now();
     println!("part 1: ");
     let filename = "input.txt";
     let _lines = fs::read_to_string(filename).expect("Could not open input file");
@@ -36,6 +38,10 @@ fn main() -> Result<()> {
     }
     println!("mult result {mult_result:?}");
 
+    let elapsed_time = now.elapsed();
+    println!("Running part 1 took {} ms.", elapsed_time.as_millis());
+    now = Instant::now();
+
     //part 2
     println!("\npart 2: ");
     let mut time_str: Vec<char> = vec![];
@@ -61,6 +67,9 @@ fn main() -> Result<()> {
     println!("time {time}");
     println!("distance {distance}");
     println!("winning_count {winning_count}");
+
+    let elapsed_time = now.elapsed();
+    println!("Running part 2 took {} ms.", elapsed_time.as_millis());
 
     Ok(())
 }
