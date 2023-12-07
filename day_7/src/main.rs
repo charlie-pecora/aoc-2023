@@ -1,5 +1,6 @@
 use std::fs;
 use std::cmp::Ordering;
+use std::collections::HashMap;
 
 fn main() {
     let filename = "input.txt";
@@ -20,36 +21,36 @@ fn main() {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 enum Card {
-    A,
-    K,
-    Q,
-    J,
-    T,
-    _9,
-    _8,
-    _7,
-    _6,
-    _5,
-    _4,
-    _3,
     _2,
+    _3,
+    _4,
+    _5,
+    _6,
+    _7,
+    _8,
+    _9,
+    T,
+    J,
+    Q,
+    K,
+    A,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 enum HandType {
-    FiveOfAKind,
-    FourOfAKind,
-    FullHouse,
-    ThreeOfAKind,
-    TwoPair,
-    OnePair,
     HighCard,
+    OnePair,
+    TwoPair,
+    ThreeOfAKind,
+    FullHouse,
+    FourOfAKind,
+    FiveOfAKind,
 }
 
 #[derive(Debug, Eq)]
 struct Hand {
     bid: u32,
-    cards: Vec<char>,
+    cards: Vec<Card>,
     hand_type: HandType,
 }
 
@@ -59,9 +60,31 @@ impl Hand {
         if split.len() != 2 {
             return None;
         }
+        let mut cards: Vec<Card> = vec![];
+        let mut card_counts = HashMap::<Card, u32>::new();
+        for c in split[0].chars() {
+            let card = match c {
+                'A' => Card::A,
+                'K' => Card::K,
+                'Q' => Card::Q,
+                'T' => Card::T,
+                '9' => Card::_9,
+                '8' => Card::_8,
+                '7' => Card::_7,
+                '6' => Card::_6,
+                '5' => Card::_5,
+                '4' => Card::_4,
+                '3' => Card::_3,
+                '2' => Card::_2,
+                _ => panic!("no such card {c}")
+            };
+            cards.push(card);
+            let count = card_counts.entry(card).or_insert(0);
+            *count += 1;
+        }
         return Some(Hand {
             bid: split[1].parse::<u32>().expect("invalid bid on hand {s}"),
-            cards: split[0].chars().collect::<Vec<char>>(),
+            cards: cards,
             hand_type: HandType::HighCard,
         });
     }
