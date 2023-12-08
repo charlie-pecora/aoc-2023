@@ -23,11 +23,12 @@ fn main() {
         let ranking = u32::try_from(i).expect("error parsing enumerate") + 1;
         score += ranking * hand.bid
     }
-    println!("part 1 score: {score}");
+    println!("part 2 score: {score}");
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 enum Card {
+    J,
     _2,
     _3,
     _4,
@@ -37,7 +38,6 @@ enum Card {
     _8,
     _9,
     T,
-    J,
     Q,
     K,
     A,
@@ -55,10 +55,19 @@ enum HandType {
 }
 
 impl HandType {
-    fn parse(card_counts: HashMap<Card, u32>) -> HandType {
+    fn parse(mut card_counts: HashMap<Card, u32>) -> HandType {
+        let jokers_count = match card_counts.remove(&Card::J) {
+            Some(v) => v,
+            None => 0,
+        };
+        if jokers_count == 5 {
+            return HandType::FiveOfAKind;
+        }
         let mut counts = card_counts.into_values().collect::<Vec<u32>>();
         counts.sort();
         counts.reverse();
+        println!("{counts:?}");
+        counts[0] += jokers_count;
         if counts[0] == 5 {
             return HandType::FiveOfAKind;
         } else if counts[0] == 4 {
