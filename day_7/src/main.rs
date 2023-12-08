@@ -66,7 +66,6 @@ impl HandType {
         let mut counts = card_counts.into_values().collect::<Vec<u32>>();
         counts.sort();
         counts.reverse();
-        println!("{counts:?}");
         counts[0] += jokers_count;
         if counts[0] == 5 {
             return HandType::FiveOfAKind;
