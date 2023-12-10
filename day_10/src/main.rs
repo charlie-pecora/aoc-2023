@@ -1,5 +1,5 @@
 use anyhow::{bail, Result};
-use std::{cmp::min, collections::HashMap, fs};
+use std::fs;
 
 type Position = (usize, usize);
 type Grid = Vec<Vec<char>>;
@@ -200,93 +200,57 @@ fn find_enclosed_spaces(grid: &Grid, path: &Vec<Position>) -> Vec<Position> {
     let mut enclosed = Vec::<Position>::new();
     for (i, row) in grid.iter().enumerate() {
         for (j, _) in row.iter().enumerate() {
+            // println!("{i}, {j}");
+            let mut passed_above = false;
+            let mut passed_below = false;
+            let mut passed_left = false;
+            let mut passed_right = false;
             let mut is_boundary = false;
-            let mut above = HashMap::<char, u32>::new();
-            let mut below = HashMap::<char, u32>::new();
-            let mut left = HashMap::<char, u32>::new();
-            let mut right = HashMap::<char, u32>::new();
+            let mut current_quadrant: Option<u8> = None;
+            let mut last_quadrant: Option<u8> = None;
             for node in path {
-                if i == node.0 {
-                    if j == node.1 {
-                        // space is part of boundary
-                        is_boundary = true;
-                    } else if node.1 > j {
-                        let count = right.entry(grid[node.0][node.1]).or_insert(0);
-                        *count += 1;
-                    } else {
-                        let count = left.entry(grid[node.0][node.1]).or_insert(0);
-                        *count += 1;
-                    }
-                } else if j == node.1 {
-                    if node.0 > i {
-                        let count = above.entry(grid[node.0][node.1]).or_insert(0);
-                        *count += 1;
-                    } else {
-                        let count = below.entry(grid[node.0][node.1]).or_insert(0);
-                        *count += 1;
-                    }
+                if (i == node.0) && (j == node.1) {
+                    // space is part of boundary
+                    is_boundary = true;
+                    // println!("is boundary");
+                    continue;
+                } else if (node.0 < i) && (node.1 < j) {
+                    current_quadrant = Some(0);
+                } else if (node.0 < i) && (node.1 > j) {
+                    current_quadrant = Some(1);
+                } else if (node.0 > i) && (node.1 > j) {
+                    current_quadrant = Some(2);
+                } else if (node.0 > i) && (node.1 < j) {
+                    current_quadrant = Some(3);
                 }
-            }
-            if is_boundary {
-                continue;
-            }
-
-            if closed_vertically(&left) {
-                if closed_vertically(&right) {
-                    if closed_horizontally(&above) {
-                        if closed_horizontally(&below) {
-                            enclosed.push((i, j));
+                if let Some(last) = last_quadrant {
+                    if let Some(current) = current_quadrant {
+                        if ((last == 0) && (current == 1)) || ((last == 1) && (current == 0)) {
+                            passed_left = !passed_left;
+                            // println!("passed_left {passed_left}");
+                        } else if ((last == 1) && (current == 2)) || ((last == 2) && (current == 1))
+                        {
+                            passed_below = !passed_below;
+                            // println!("passed_below {passed_below}");
+                        } else if ((last == 2) && (current == 3)) || ((last == 3) && (current == 2))
+                        {
+                            passed_right = !passed_right;
+                            // println!("passed_right {passed_right}");
+                        } else if ((last == 3) && (current == 0)) || ((last == 0) && (current == 3))
+                        {
+                            passed_above = !passed_above;
+                            // println!("passed_above {passed_above}");
                         }
                     }
                 }
+                last_quadrant = current_quadrant;
+            }
+            if is_boundary {
+                continue;
+            } else if passed_above && passed_below && passed_left && passed_right {
+                enclosed.push((i, j));
             }
         }
     }
     enclosed
-}
-
-fn closed_vertically(entries: &HashMap<char, u32>) -> bool {
-    let mut score = 0;
-    if let Some(v) = entries.get(&'|') {
-        score += v;
-    }
-    let mut compat_chars_1 = 0;
-    let mut compat_chars_2 = 0;
-    if let Some(v) = entries.get(&'F') {
-        compat_chars_1 += v;
-    }
-    if let Some(v) = entries.get(&'7') {
-        compat_chars_1 += v;
-    }
-    if let Some(v) = entries.get(&'J') {
-        compat_chars_2 += v;
-    }
-    if let Some(v) = entries.get(&'L') {
-        compat_chars_2 += v;
-    }
-    score += min(compat_chars_1, compat_chars_2);
-    score % 2 == 1
-}
-
-fn closed_horizontally(entries: &HashMap<char, u32>) -> bool {
-    let mut score = 0;
-    if let Some(v) = entries.get(&'-') {
-        score += v;
-    }
-    let mut compat_chars_1 = 0;
-    let mut compat_chars_2 = 0;
-    if let Some(v) = entries.get(&'F') {
-        compat_chars_1 += v;
-    }
-    if let Some(v) = entries.get(&'7') {
-        compat_chars_2 += v;
-    }
-    if let Some(v) = entries.get(&'J') {
-        compat_chars_2 += v;
-    }
-    if let Some(v) = entries.get(&'L') {
-        compat_chars_1 += v;
-    }
-    score += min(compat_chars_1, compat_chars_2);
-    score % 2 == 1
 }
