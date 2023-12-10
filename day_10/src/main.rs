@@ -18,13 +18,11 @@ fn main() {
     let starting_point = find_start(&grid).expect("Couldn't find start");
     println!("starting point: {starting_point:?}");
     let path = find_path(&starting_point, &grid);
-    println!("path: {path:?}");
+    // println!("path: {path:?}");
     println!("farthest_point: {:?}", path.len() / 2);
 
-    let updated_grid = set_starting_char(grid, &path);
-
-    let enclosed_spaces = find_enclosed_spaces(&updated_grid, &path);
-    println!("enclosed spaces: {:?}", enclosed_spaces);
+    let enclosed_spaces = find_enclosed_spaces(&grid, &path);
+    // println!("enclosed spaces: {:?}", enclosed_spaces);
     println!("number of enclosed spaces: {}", enclosed_spaces.len());
 }
 
@@ -154,46 +152,6 @@ fn check_below(c: &char) -> Option<Direction> {
         'S' => Some(Direction::Any),
         _ => None,
     }
-}
-
-fn set_starting_char(mut grid: Grid, path: &Vec<Position>) -> Grid {
-    let first_position = path[0];
-    let second_position = path[1];
-    let last_position = path[path.len() - 2];
-    let mut starting_char: Option<char> = None;
-    if (second_position.0 != first_position.0) && (last_position.0 != first_position.0) {
-        starting_char = Some('|');
-    } else if (second_position.1 != first_position.1) && (last_position.1 != first_position.1) {
-        starting_char = Some('-');
-    } else if second_position.0 < first_position.0 {
-        if last_position.1 > first_position.1 {
-            starting_char = Some('L');
-        } else if last_position.1 < first_position.1 {
-            starting_char = Some('J');
-        }
-    } else if second_position.0 > first_position.0 {
-        if last_position.1 > first_position.1 {
-            starting_char = Some('F');
-        } else if last_position.1 < first_position.1 {
-            starting_char = Some('7');
-        }
-    } else if last_position.0 < first_position.0 {
-        if second_position.1 > first_position.1 {
-            starting_char = Some('L');
-        } else if second_position.1 < first_position.1 {
-            starting_char = Some('J');
-        }
-    } else if last_position.0 > first_position.0 {
-        if second_position.1 > first_position.1 {
-            starting_char = Some('F');
-        } else if second_position.1 < first_position.1 {
-            starting_char = Some('7');
-        }
-    }
-    if let Some(c) = starting_char {
-        grid[first_position.0][first_position.1] = c;
-    }
-    grid
 }
 
 fn find_enclosed_spaces(grid: &Grid, path: &Vec<Position>) -> Vec<Position> {
