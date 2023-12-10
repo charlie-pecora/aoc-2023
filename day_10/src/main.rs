@@ -39,7 +39,6 @@ fn find_path(start: &Position, grid: &Grid) -> Vec<Position> {
     let mut next_direction = Direction::Any;
     let mut started = false;
     while !(started && (next_direction == Direction::Any)) {
-        println!("looping");
         match next_direction {
             Direction::Any => {
                 if current.1 != 0 {
@@ -92,7 +91,6 @@ fn find_path(start: &Position, grid: &Grid) -> Vec<Position> {
                     next_direction = nd;
                 }
             }
-            _ => break,
         }
         current = path[path.len() - 1];
     }
