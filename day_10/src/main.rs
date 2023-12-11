@@ -1,4 +1,5 @@
 use anyhow::{bail, Result};
+use colored::*;
 use std::fs;
 
 type Position = (usize, usize);
@@ -12,9 +13,6 @@ fn main() {
         .lines()
         .map(|line| line.chars().collect::<Vec<char>>())
         .collect::<Vec<Vec<char>>>();
-    for line in &grid {
-        println!("{line:?}");
-    }
     let starting_point = find_start(&grid).expect("Couldn't find start");
     println!("starting point: {starting_point:?}");
     let path = find_path(&starting_point, &grid);
@@ -24,6 +22,7 @@ fn main() {
     let enclosed_spaces = find_enclosed_spaces(&grid, &path);
     // println!("enclosed spaces: {:?}", enclosed_spaces);
     println!("number of enclosed spaces: {}", enclosed_spaces.len());
+    print_grid(&grid, &path, &enclosed_spaces);
 }
 
 fn find_start(grid: &Grid) -> Result<Position> {
@@ -211,4 +210,19 @@ fn find_enclosed_spaces(grid: &Grid, path: &Vec<Position>) -> Vec<Position> {
         }
     }
     enclosed
+}
+
+fn print_grid(grid: &Grid, path: &Vec<Position>, inside: &Vec<Position>) {
+    for (i, row) in grid.iter().enumerate() {
+        for (j, c) in row.iter().enumerate() {
+            if path.iter().any(|x| x == &(i, j)) {
+                print!("{}", c.to_string().yellow());
+            } else if inside.iter().any(|x| x == &(i, j)) {
+                print!("{}", c.to_string().red());
+            } else {
+                print!("{}", c.to_string().blue());
+            }
+        }
+        print!("\n");
+    }
 }
