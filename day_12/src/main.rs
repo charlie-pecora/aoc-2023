@@ -5,7 +5,8 @@ fn main() -> io::Result<()> {
     let mut part_1_possibilities_sum: usize = 0;
     let mut part_2_possibilities_sum: usize = 0;
     let lines = io::stdin().lines();
-    for line in lines {
+    for (i, line) in lines.enumerate() {
+        println!("line {i}");
         let l = line?;
         let parts = l.split_whitespace().collect::<Vec<&str>>();
         if parts.len() != 2 {
@@ -16,22 +17,32 @@ fn main() -> io::Result<()> {
             .map(|x| x.parse::<usize>().expect("can't parse into int"))
             .collect::<Vec<usize>>();
         let records = parts[0].chars().collect::<Vec<char>>();
+        // println!("{records:?}");
+        // println!("{broken_springs:?}");
 
-        let possibilities = calculate_possibilities(&records, &broken_springs);
-        part_1_possibilities_sum += possibilities;
+        let part_one_possibilities = calculate_possibilities(&records, &broken_springs);
+        println!("{part_one_possibilities:?}");
+        part_1_possibilities_sum += part_one_possibilities;
 
+        // need to calculate the possibilites with two copies of the parts
         let mut part_2_records = records.clone();
         let mut part_2_broken_springs = broken_springs.clone();
-        for _ in 0..5 {
-            part_2_records.push('?');
-            part_2_records.extend(&records);
-            part_2_broken_springs.extend(&broken_springs);
-        }
-        println!("{part_2_records:?}");
-        println!("{part_2_broken_springs:?}");
-        let possibilities = calculate_possibilities(&part_2_records, &part_2_broken_springs);
-        println!("{possibilities:?}");
-        part_2_possibilities_sum += possibilities;
+        part_2_records.push('?');
+        part_2_records.insert(0, '?');
+        // for _ in 0..1 {
+        //     part_2_records.push('?');
+        //     part_2_records.extend(&records);
+        //     part_2_broken_springs.extend(&broken_springs);
+        // }
+        // println!("{part_2_records:?}");
+        // println!("{part_2_broken_springs:?}");
+        let two_copy_possibilities = calculate_possibilities(&part_2_records, &part_2_broken_springs);
+        // use the ratio of possibilities w/ 2 vs 1 copies, then extrapolate to 5
+        let ratio = two_copy_possibilities / part_one_possibilities;
+        let part_2_possibilities = ratio.pow(4) * part_one_possibilities;
+        println!("{part_2_possibilities:?}");
+        part_2_possibilities_sum += part_2_possibilities;
+
     }
     println!("Part 1 total possibilities: {part_1_possibilities_sum}");
     println!("Part 2 total possibilities: {part_2_possibilities_sum}");
@@ -70,6 +81,9 @@ fn check_broken_springs(records: &Vec<char>, broken_springs: &Vec<usize>) -> boo
     for record in records {
         if record == &'#' {
             current_count += 1;
+            if current_count > broken_springs[broken_springs_index] {
+                return false;
+            }
         } else if current_count > 0 {
             if broken_springs[broken_springs_index] == current_count {
                 current_count = 0;
